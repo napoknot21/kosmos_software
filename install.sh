@@ -22,22 +22,8 @@ echo "$nom_raspberry"
 USB_NAME=$(lsblk -o LABEL,MOUNTPOINT | grep "/media\|/mnt" | awk '{print $1}')
 echo "$USB_NAME"
 
-#Creation du fichier de lancement
-cd ..
-echo "#!/bin/bash" > lancement.sh
-
-#Ajout de la commande de lancement du programme
-sudo echo "sleep 15
-
-#Deplacement du fichier kosmos_config.ini dans la cle USB
-sudo cp -n /home/$nom_raspberry/kosmos_software/kosmos_config.ini /media/$nom_raspberry/$USB_NAME
-
-#Lance kosmos_main.py 
-cd /home/$nom_raspberry/kosmos_software/kosmosV3-env
-sudo python3 kosmos_main.py" >> lancement.sh
-
 #Rendre le lancement.sh executable
-sudo chmod 755 lancement.sh
+sudo chmod 755 lancement.py
 
 #Activation de "Legacy camera" et "i2c"
 cd ..
@@ -45,7 +31,7 @@ sudo raspi-config nonint do_i2c 0
 
 #Ajout de la ligne de commande dans crontab qui permet le lancement au demarrage et création d'un dossier log
 mkdir -p /home/$nom_raspberry/kosmos_software/logfile
-(sudo crontab -l; echo "@reboot sudo bash /home/$nom_raspberry/kosmos_software/lancement.sh > /home/$nom_raspberry/kosmos_software/logfile/log.txt 2>&1";) | uniq - | sudo crontab
+(sudo crontab -l; echo "@reboot sudo python3 /home/$nom_raspberry/kosmos_software/lancement.py > /home/$nom_raspberry/kosmos_software/logfile/log.txt 2>&1";) | uniq - | sudo crontab
 sudo crontab -l
 
 exit 0
