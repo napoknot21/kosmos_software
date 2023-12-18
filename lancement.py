@@ -24,6 +24,9 @@ def mode_heures_precises(heures_precises, SETT_RECORD_TIME):
 			executer_kosmos_main()
 			
 time.sleep(60)
+
+#Recuperation des parametres compris dans le fichier .ini
+
 config = configparser.ConfigParser()
 config.read('/media/kosmosimt/KOSMOS_CLE/kosmos_config.ini')
 
@@ -33,6 +36,7 @@ heures_precises = config.get('KOSMOS','SETT_HEURES_PRECISES')
 
 
 	
+#Mode de fonctionnement STAVIRO ou MIKADO 
 
 if SETT_MODE == 0:
 	mode_heures_precises(heures_precises, SETT_RECORD_TIME)

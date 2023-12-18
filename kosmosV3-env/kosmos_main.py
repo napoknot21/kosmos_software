@@ -194,11 +194,14 @@ class kosmos_main():
                         self.motor_event.clear()
                         time.sleep(temps_pose)
                         self.motorThread.set_speed(vitesse_mot)
-                #sortie de boucle while 
-            #self.state = KState.STOPPING
-            #os.system("killall kosmos_main.py")
+                #sortie de boucle while
+                 
+            #Fin de l'enregistrement alors on stop tout et on attend le prochain enregistrement
+            
             self.motorThread.stop_thread()  # Stop moteur
             self.thread_camera.closeCam()   # Stop caméra
+            
+            #Arret du programme Kosmos_main
             os.system("sudo kill $(pgrep -f kosmos_main)")
 
     
