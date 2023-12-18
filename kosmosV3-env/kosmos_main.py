@@ -171,6 +171,7 @@ class kosmos_main():
                 self.button_event.wait(temps_rotation60)
                 print('nouvelle boucle')
                 now=int(time.time())
+                print(time.time())
                 temps_consigne=self.tps_record
                 temps=now-past
                 if (temps>=temps_consigne): #quand on fait 15 minutes ( 900 secondes ) on arrête
@@ -194,7 +195,12 @@ class kosmos_main():
                         time.sleep(temps_pose)
                         self.motorThread.set_speed(vitesse_mot)
                 #sortie de boucle while 
-            self.state = KState.STOPPING
+            #self.state = KState.STOPPING
+            #os.system("killall kosmos_main.py")
+            self.motorThread.stop_thread()  # Stop moteur
+            self.thread_camera.closeCam()   # Stop caméra
+            os.system("sudo kill $(pgrep -f kosmos_main)")
+
     
     def stopping(self):
         logging.info("ETAT : Kosmos termine son enregistrement")
