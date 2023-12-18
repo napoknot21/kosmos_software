@@ -12,3 +12,4 @@ sudo raspi-config
 # I1 Legacy Camera -> enable
 _________________________________________________________________________________
 #La raspberry va redemarrer automatiquement et sera prete a etre utilisé
+# IMT
