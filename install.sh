@@ -23,6 +23,7 @@ USB_NAME=$(lsblk -o LABEL,MOUNTPOINT | grep "/media\|/mnt" | awk '{print $1}')
 echo "$USB_NAME"
 
 #Rendre le lancement.sh executable
+cd kosmos_software
 sudo chmod 755 lancement.py
 
 #Activation de "Legacy camera" et "i2c"

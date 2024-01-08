@@ -10,7 +10,8 @@ import os
 
 def executer_kosmos_main():
 			
-	os.system("cd /home/kosmosimt/kosmos_software/kosmosV3-env && sudo python kosmos_main.py")
+	#os.system("cd /home/kosmosimt/kosmos_software/kosmosV3-env && sudo python kosmos_main.py")
+	os.system("cd /home/kosmos/kosmos_software/kosmosV3-env && sudo python kosmos_main.py")
 		
 	
 def mode_heures_precises(heures_precises, SETT_RECORD_TIME):
@@ -28,7 +29,8 @@ time.sleep(60)
 #Recuperation des parametres compris dans le fichier .ini
 
 config = configparser.ConfigParser()
-config.read('/media/kosmosimt/KOSMOS_CLE/kosmos_config.ini')
+#config.read('/media/kosmosimt/KOSMOS_CLE/kosmos_config.ini')
+config.read('/media/kosmos/kosmoscle2/kosmos_config.ini')
 
 SETT_MODE = int(config.get('KOSMOS', 'SETT_MODE'))
 SETT_RECORD_TIME = int(config.get('KOSMOS', 'SETT_RECORD_TIME'))
