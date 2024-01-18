@@ -18,10 +18,6 @@ sudo pip install -r requirements.txt
 nom_raspberry=$(whoami)
 echo "$nom_raspberry"
 
-#Recuperation du nom de la clef USB
-USB_NAME=$(lsblk -o LABEL,MOUNTPOINT | grep "/media\|/mnt" | awk '{print $1}')
-echo "$USB_NAME"
-
 #Rendre le lancement.sh executable
 cd kosmos_software
 sudo chmod 755 lancement.py
