@@ -14,7 +14,10 @@ int debounce = 2000;
 bool state = false;
 
 // paramètres rotation moteur
-#define one_revolution 12800
+#define step_mode 4 // 1 pour full_step, 2 pour 1/2 microstep, 16 pour 1/16 microstep etc
+#define number_of_revolutions 10
+#define max_speed 6000
+#define max_acceleration 6000
 
 // données reçues par communication Raspberry
 #define pause_time 5000
@@ -24,8 +27,8 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 void setup() {
   // Set the maximum speed and acceleration:
-  stepper.setMaxSpeed(1000);
-  stepper.setAcceleration(1000);
+  stepper.setMaxSpeed(max_speed);
+  stepper.setAcceleration(max_acceleration);
 
   attachInterrupt(digitalPinToInterrupt(interrupt_pin), change_state, RISING);
 }
@@ -33,7 +36,7 @@ void setup() {
 void loop() {
   if (state) {
     // Set the target position:
-    stepper.move(one_revolution);
+    stepper.move(400*number_of_revolutions*step_mode);
     // Run to target position with set speed and acceleration/deceleration:
     stepper.runToPosition();
 
