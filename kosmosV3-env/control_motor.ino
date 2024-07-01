@@ -14,12 +14,12 @@ volatile unsigned long last_button_time = 0;
 int debounce = 2000;
 
 //état de l'interrupteur ILS
-bool state = false;
+bool state = 0;
 
 // structures pour les infos i2c
 int Data = 1;
 int Data_indent = 0;
-int i2cData[5] = {};
+int i2cData[6] = {};
 
 // paramètres rotation moteur transmissibles par la Raspberry
 int number_of_revolutions = 10,
@@ -50,6 +50,12 @@ void setup() {
 }
 
 void loop() {
+  
+  Serial.print("state = "); Serial.print(state); Serial.print(" ; revolutions = "); Serial.print(number_of_revolutions); Serial.print(" ; max_speed = "); Serial.print(max_speed);
+  Serial.print(" ; max_accel = "); Serial.print(max_acceleration); Serial.print(" ; pause_time = "); Serial.print(pause_time); Serial.print(" ; step_mode = "); Serial.println(step_mode); 
+  delay(1000);
+  
+
   if (state) {
     // Set the target position:
     stepper.move(400*number_of_revolutions*step_mode);
@@ -60,17 +66,13 @@ void loop() {
     // Attente entre 2 rotations
     delay(pause_time*1000);
   }
-  for (int j = 0; j<=4; j++){
-    Serial.print(i2cData[j]);
-    Serial.print(" ; ");
-    }
-  Serial.println("");
-  delay(1000);
+
 }
 
 // fonction appelée par l’interruption externe n°0
 void change_state()
 {
+  Serial.println("front détecté");
   button_time = millis();
   if (button_time > last_button_time + debounce) {
     state = !state;  // inverse l’état de la variable
@@ -85,15 +87,15 @@ void receiveData(int byteCount) {
     if (!Data) {Data_indent = 0;}
     else{
       i2cData[Data_indent] = Data;
-      ++Data_indent;
+      Data_indent += 1;
     }
     if (Data_indent == 6) {
-      state = i2cData[0];
+      state = bool(i2cData[0] - 1);
+      step_mode = i2cData[5];
       number_of_revolutions = i2cData[1];
       stepper.setMaxSpeed(i2cData[2]*step_mode*10);
       stepper.setAcceleration(i2cData[3]*step_mode*10);
       pause_time = i2cData[4];
-      step_mode = i2cData[5];
     }
   }
 }
