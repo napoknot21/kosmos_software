@@ -14,7 +14,11 @@ volatile unsigned long last_button_time = 0;
 int debounce = 2000;
 
 //état de l'interrupteur ILS
-bool state = 0;
+bool state_auto = 0;
+//état commandé par la Raspberry via i2c
+bool state_i2c = 0;
+//état de la connexion i2c 
+bool i2c_detected = false;
 
 // structures pour les infos i2c
 int Data = 1;
@@ -51,12 +55,12 @@ void setup() {
 
 void loop() {
   
-  Serial.print("state = "); Serial.print(state); Serial.print(" ; revolutions = "); Serial.print(number_of_revolutions); Serial.print(" ; max_speed = "); Serial.print(max_speed);
+  Serial.print("state_i2c = "); Serial.print(state_i2c); Serial.print("state_auto = "); Serial.print(state_auto); Serial.print(" ; revolutions = "); Serial.print(number_of_revolutions); Serial.print(" ; max_speed = "); Serial.print(max_speed);
   Serial.print(" ; max_accel = "); Serial.print(max_acceleration); Serial.print(" ; pause_time = "); Serial.print(pause_time); Serial.print(" ; step_mode = "); Serial.println(step_mode); 
   delay(1000);
   
 
-  if (state) {
+  if ((i2c_detected & state_i2c) || (!i2c_detected & state_auto)) {
     // Set the target position:
     stepper.move(400*number_of_revolutions*step_mode);
 
@@ -75,7 +79,7 @@ void change_state()
   Serial.println("front détecté");
   button_time = millis();
   if (button_time > last_button_time + debounce) {
-    state = !state;  // inverse l’état de la variable
+    state_auto = !state_auto;  // inverse l’état de la variable
     last_button_time = button_time;
   }
 }
@@ -83,6 +87,7 @@ void change_state()
 // fonction appelée à la réception d'un octet i2c 
 void receiveData(int byteCount) {
   while (Wire.available()) {
+    i2c_detected = true;
     Data = Wire.read();
     if (!Data) {Data_indent = 0;}
     else{
@@ -90,7 +95,7 @@ void receiveData(int byteCount) {
       Data_indent += 1;
     }
     if (Data_indent == 6) {
-      state = bool(i2cData[0] - 1);
+      state_i2c = bool(i2cData[0] - 1);
       step_mode = i2cData[5];
       number_of_revolutions = i2cData[1];
       stepper.setMaxSpeed(i2cData[2]*step_mode*10);
@@ -104,3 +109,4 @@ void receiveData(int byteCount) {
 void sendData() {
   Wire.write(1);
 }
+
