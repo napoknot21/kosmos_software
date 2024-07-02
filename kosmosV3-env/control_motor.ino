@@ -50,15 +50,16 @@ void setup() {
   Wire.onRequest(sendData);
 
   //setup communication série avec l'ordinateur
-  Serial.begin(9600);
+  //Serial.begin(9600);
 }
 
 void loop() {
   
+  /*
   Serial.print("state_i2c = "); Serial.print(state_i2c); Serial.print("state_auto = "); Serial.print(state_auto); Serial.print(" ; revolutions = "); Serial.print(number_of_revolutions); Serial.print(" ; max_speed = "); Serial.print(max_speed);
   Serial.print(" ; max_accel = "); Serial.print(max_acceleration); Serial.print(" ; pause_time = "); Serial.print(pause_time); Serial.print(" ; step_mode = "); Serial.println(step_mode); 
   delay(1000);
-  
+  */
 
   if ((i2c_detected & state_i2c) || (!i2c_detected & state_auto)) {
     // Set the target position:
@@ -87,7 +88,8 @@ void change_state()
 // fonction appelée à la réception d'un octet i2c 
 void receiveData(int byteCount) {
   while (Wire.available()) {
-    i2c_detected = true;
+    if (!i2c_detected) {i2c_detected = true;}
+    // ajouter ici une mesure de l'heure (t = millis()) afin de stopper le moteur dans loop si plus de détection de l'i2c après une durée donnée (pour gérer un débranchement éventuel)
     Data = Wire.read();
     if (!Data) {Data_indent = 0;}
     else{
@@ -107,6 +109,8 @@ void receiveData(int byteCount) {
 
 // fonction appelée par requête de la Raspberry
 void sendData() {
-  Wire.write(1);
+  Wire.write(i2c_detected);
 }
+
+
 
