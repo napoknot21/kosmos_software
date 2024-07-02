@@ -4,90 +4,89 @@
 Controle du moteur via communication i2c avec Arduino Nano
 Le code ci-dessous envoie une liste de paramètres à l'Arduino qui permet de modifier le comportement de la rotation moteur
 """
-
 import logging
 from gpiozero import Button, DigitalOutputDevice, PWMOutputDevice
-import time
 from threading import Thread
 from threading import Event
+import time
+
+try:
+    import smbus
+except:
+    print ('Try sudo apt install python3-smbus2') #D. Hanon ajout de () pour être compatible python_3
 
 from kosmos_config import *
 
-class kosmosEscMotor(Thread):
+class kosmosMotor(Thread):
 
     def __init__(self, aConf: KosmosConfig):
+        
         Thread.__init__(self)
-        
-        # Initialisation port GPIO ESC & RElai               
-        self.Relai_GPIO = DigitalOutputDevice(aConf.get_val_int("11_MOTOR_power_gpio"))
-        self.PWM_GPIO = PWMOutputDevice(pin=aConf.get_val_int("10_MOTOR_esc_gpio"),frequency=50)
-        
-        # Initialisation du bouton asservissement moteur
-        self.Button_motor = Button(aConf.get_val_int("12_MOTOR_button_gpio"))#,bounce_time=0.5)
+
+        try:
+            self._bus = smbus.SMBus(bus)
+        except:
+            print("Bus %d is not available.") % bus
+            print("Available busses are listed as /dev/i2c*")
+            self._bus = None
         
         # Evénement pour commander l'arrêt du Thread
         self._pause_event = Event()
         self._continue_event = Event()
         self._t_stop = False 
-                  
-        # Paramètres Moteur
-        self.tps_POSE=aConf.get_val_int("15_MOTOR_pause_time")
-        self.vitesse_moteur=aConf.get_val_int("14_MOTOR_vitesse_favorite")
-        self.vitesse_min = aConf.get_val_int("13_MOTOR_vitesse_min")
-        self.inertie_time = aConf.get_val_int("16_MOTOR_inertie_time") # en ms
-        self.timeout = aConf.get_val_int("17_MOTOR_timeout") # en s
+
+        self._address = 0x04
+        self._state = 0
         
-    def power_on(self):
-        """Commande le relai d'alimentation de l'ESC"""
-        self.Relai_GPIO.on() # Fermeture du relai
+        # Paramètres Moteur
+        self.pause_time = aConf.get_val_int("13_MOTOR_pause_time") # en s
+        self.motor_vitesse = aConf.get_val_int("11_motor_vitesse") # minimum : 1 ; maximum : 250
+        self.motor_accel = aConf.get_val_int("12_motor_acceleration") # minimum : 1 ; maximum : 250
+        self.motor_revolutions = aConf.get_val_int("10_motor_revolutions") # 10 revolutions : 60°
+        self.step_mode = aConf.get_val_int("14_motor_step_mode") # 1 pour full_step, 2 pour 1/2 microstep, 4 pour 1/4 microstep, 16 pour 1/16 microstep etc
+        self.i2c_period = aConf.get_val_int("15_motor_i2c_communication_period") # en s
 
     def power_off(self):
-        """Commande le relai d'alimentation de l'ESC"""
-        self.Relai_GPIO.off() # Ouverture du relai
-        
-    def set_speed(self, aSpeed):
-        """Lancement à la vitesse passée en paramètre
-        1000 < vitesse < 2100 """
-        self.PWM_GPIO.value=aSpeed*0.00005
-        logging.debug(f"Moteur vitesse {aSpeed}.")    
-        
+        """Commande l'arrêt de la rotation moteur (fonction appelée par la main en cas de shutdown)"""
+        self._state = 0
+        self.send_data()
+
+    def send_data(self):
+        i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self.pause_time, self.step_mode]
+        bus.write_i2c_block_data(self._address, 0x00, i2cData)
+        if bus.read_byte(address) :
+            logging.info('paramètres moteurs reçus par l'Arduino')
+        else :
+            logging.info('Erreur transmission Arduino i2c')
+    
     def autoArm(self): 
-        self.power_on()
-        time.sleep(1)
-        
-        self.set_speed(self.vitesse_min) # ne fait pas tourner le KOSMOS
+        '''activation de la rotation moteur 1 fois pour témoigner de son fonctionnement à l'allumage'''
         time.sleep(2)
         
-        self.set_speed(self.vitesse_moteur) 
-        self.Button_motor.wait_for_release(timeout=5)
-        logging.info('Bouton asservissement Moteur détecté')
-        time.sleep(self.inertie_time/1000)
-        self.set_speed(0)
+        self._state = 1
+        self.send_data()
+
+        time.sleep(1)
         
-        logging.info('Moteur et ESC prêts !')
+        self._state = 0
+        self.send_data()
+        
+        logging.info('Moteur prêt !')
         
     def arret_complet(self):
-        self.set_speed(0)
         self.PWM_GPIO.off()
     
     def run(self):
-        logging.info('Debut du thread moteur ESC.')
+        logging.info('Debut du thread moteur.')
         while not self._t_stop:
             if not self._pause_event.isSet():
-                
-                self.set_speed(self.vitesse_moteur)
-                self.Button_motor.wait_for_release(timeout=self.timeout)
-                logging.info('Bouton asservissement Moteur détecté')
-                time.sleep(self.inertie_time/1000)
-                self.set_speed(0)
-                
-                time_debut=time.time()
-                delta_time=0
-                while not self._pause_event.isSet() and delta_time < self.tps_POSE:
-                    delta_time = time.time()-time_debut
-                    time.sleep(0.5)
-                
+                while not self._pause_event.isSet():
+                    self._state = 1
+                    self.send_data()
+                    time.sleep(self.i2c_period)
             else:
+                self._state = 0
+                self.send_data()
                 self._continue_event.wait()  
         # End While        
         self.arret_complet() #stop relai
@@ -111,4 +110,4 @@ class kosmosEscMotor(Thread):
             self._continue_event.set()
         else:
             self.start()
-           
+          
