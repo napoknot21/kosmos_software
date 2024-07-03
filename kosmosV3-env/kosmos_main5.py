@@ -20,7 +20,8 @@ from kosmos_config import *
 import kosmos_config as KConf
 import kosmos_csv as KCsv
 import kosmos_cam5 as KCam
-import kosmos_esc_motor5 as KMotor
+#import kosmos_esc_motor5 as KMotor
+import kosmos_motor as KMotor
 import sys
 
 logging.basicConfig(level=logging.INFO,
@@ -42,11 +43,11 @@ class kosmos_main():
         self.init()
 
     def init(self):
-        
+        logging.info("lecture du fichier de configuration")
         # Lecture du fichier de configuration
         self._conf = KConf.KosmosConfig()
         self.state = KState.STARTING
-
+        
         # LEDs
         self._ledB = LED(self._conf.get_val_int("03_SYSTEM_led_b"))
         self._ledR = LED(self._conf.get_val_int("04_SYSTEM_led_r"))
@@ -69,10 +70,12 @@ class kosmos_main():
         #Definition Thread CSV
         self.thread_csv = KCsv.kosmosCSV(self._conf)
         
+        logging.info("définition thread moteur")
         #Definition Thread Moteur
         self.PRESENCE_MOTEUR = self._conf.get_val_int("06_SYSTEM_moteur") # Fonctionnement moteur si 1
         if self.PRESENCE_MOTEUR==1:
-            self.motorThread = KMotor.kosmosEscMotor(self._conf)
+            #self.motorThread = KMotor.kosmosEscMotor(self._conf)
+            self.motorThread = KMotor.kosmosMotor(self._conf)
           
     def clear_events(self):
         """Mise à 0 des evenements attachés aux boutons"""
