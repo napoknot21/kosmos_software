@@ -50,6 +50,7 @@ class kosmosMotor(Thread):
         """Commande l'arrêt de la rotation moteur (fonction appelée par la main en cas de shutdown)"""
         self._state = 0
         self.send_data()
+        # à la place, possibilité d'envoyer un signal d'interruption (front descendant ou montant ?) pour mettre l'arduino en mode deep_sleep
 
     def send_data(self):
         i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self.pause_time, self.step_mode]
@@ -72,9 +73,6 @@ class kosmosMotor(Thread):
         self.send_data()
         
         logging.info('Moteur prêt !')
-        
-    def arret_complet(self):
-        self.PWM_GPIO.off()
     
     def run(self):
         logging.info('Debut du thread moteur.')
@@ -89,7 +87,6 @@ class kosmosMotor(Thread):
                 self.send_data()
                 self._continue_event.wait()  
         # End While        
-        self.arret_complet() #stop relai
         logging.info("Thread moteur terminé")
    
     def stop_thread(self):
