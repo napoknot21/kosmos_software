@@ -5,6 +5,7 @@
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define dirPin 4
 #define stepPin 5
+#define enablePin 6
 
 // paramètres d'interruption
 #define interrupt_pin 2
@@ -39,9 +40,12 @@ int number_of_revolutions = 10,
 AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 void setup() {
+  pinMode(enablePin, OUTPUT);
+  digitalWrite(enablePin, LOW);
   // Set the maximum speed and acceleration:
   stepper.setMaxSpeed(max_speed*step_mode*10);
   stepper.setAcceleration(max_acceleration*step_mode*10);
+  stepper.disableOutputs();
 
   // définition de l'interruption liée à l'ILS pour déclencher le fonctionnement moteur indépendant
   attachInterrupt(digitalPinToInterrupt(interrupt_pin), change_state, RISING);
@@ -101,10 +105,13 @@ void receiveData(int byteCount) {
 }
 
 void motorRotate(){
-      // Set the target position:
-    stepper.move(400*number_of_revolutions*step_mode);
+  digitalWrite(enablePin, HIGH);
+    // Set the target position:
+  stepper.move(400*number_of_revolutions*step_mode);
     // Run to target position with set speed and acceleration/deceleration:
-    stepper.runToPosition();
+  stepper.runToPosition();
+
+  digitalWrite(enablePin, LOW);
 }
 
 // fonction appelée par requête de la Raspberry
