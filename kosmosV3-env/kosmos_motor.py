@@ -67,14 +67,7 @@ class kosmosMotor(Thread):
 
     def autoArm(self): 
         '''activation de la rotation moteur 1 fois pour témoigner de son fonctionnement à l'allumage'''
-        time.sleep(2)
-        
         self._state = 1
-        self.send_data()
-
-        time.sleep(1)
-        
-        self._state = False
         self.send_data()
         
         logging.info('Moteur prêt !')
@@ -87,8 +80,13 @@ class kosmosMotor(Thread):
                 
                     self._state = True
                     self.send_data()
+                    rotation_done = False
                     
-                    while not self._pause_event.isSet() and not self._bus.read_byte(self._address) :
+                    while not self._pause_event.isSet() and not rotation_done :
+                            try :
+                                rotation_done = self._bus.read_byte(self._address)
+                            except :
+                                logging.error('Erreur moteur : réception Arduino impossible')
                             time.sleep(0.5)
                             
                     time_debut=time.time()
