@@ -36,8 +36,12 @@ class kosmosMotor(Thread):
         self._continue_event = Event()
         self._t_stop = False 
 
+        self.wakeUp_GPIO = DigitalOutputDevice(27)
+        self.wakeUp_GPIO.off()
+      
         self._address = 0x04
-        self._state = 0
+        self._state = 1
+        self._sleep_mode = 0
         
         # Paramètres Moteur
         self.motor_revolutions = aConf.get_val_int("10_MOTOR_revolutions")
@@ -53,16 +57,23 @@ class kosmosMotor(Thread):
         self.i2c_period = aConf.get_val_int("15_MOTOR_i2c_communication_period")
         # en s
 
+    def power_on(self):
+        # déclencher une interruption pour réveiller l'arduino si elle est en mode deep sleep
+        self.wakeUp_GPIO.on()
+        time.sleep(1)
+        self.wakeUp_GPIO.off()
+      
     def power_off(self):
         """Commande l'arrêt de la rotation moteur (fonction appelée par la main en cas de shutdown)"""
+        self.wakeUp_GPIO.off()
         self._state = 0
+        self._sleep_mode = 1
         self.send_data()
-        # à la place, possibilité d'envoyer un signal d'interruption (front descendant ou montant ?) pour mettre l'arduino en mode deep_sleep
+        self._bus.close()
 
     def send_data(self):
-        i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self.pause_time, self.step_mode]
-        # self.pause_time paramètre à enlever de la transmission, self.step_mode aussi à l'avenir
-        
+        i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self._sleep_mode + 1, self.step_mode]
+        # self.step_mode paramètre à enlever de la transmission à l'avenir
         try:
                 self._bus.write_i2c_block_data(self._address, 0x00, i2c_Data)
         except:
@@ -70,7 +81,7 @@ class kosmosMotor(Thread):
 
     def autoArm(self): 
         '''activation de la rotation moteur 1 fois pour témoigner de son fonctionnement à l'allumage'''
-        self._state = 1
+        self.power_on()
         self.send_data()
         
         logging.info('Moteur prêt !')
@@ -122,4 +133,3 @@ class kosmosMotor(Thread):
             self._continue_event.set()
         else:
             self.start()
-          

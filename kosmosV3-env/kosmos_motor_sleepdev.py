@@ -37,6 +37,7 @@ class kosmosMotor(Thread):
         self._t_stop = False 
 
         self.wakeUp_GPIO = DigitalOutputDevice(27)
+        self.wakeUp_GPIO.off()
       
         self._address = 0x04
         self._state = 1
@@ -64,9 +65,11 @@ class kosmosMotor(Thread):
       
     def power_off(self):
         """Commande l'arrêt de la rotation moteur (fonction appelée par la main en cas de shutdown)"""
+        self.wakeUp_GPIO.off()
         self._state = 0
         self._sleep_mode = 1
         self.send_data()
+        self._bus.close()
 
     def send_data(self):
         i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self._sleep_mode + 1, self.step_mode]
