@@ -3,6 +3,7 @@
 """
 Controle du moteur via communication i2c avec Arduino Nano
 Le code ci-dessous envoie une liste de paramètres à l'Arduino qui permet de modifier le comportement de la rotation moteur
+Le code fonctionne mais est encore en chantier, pas mal de choses restent à optimiser
 """
 import logging
 from gpiozero import Button, DigitalOutputDevice, PWMOutputDevice
@@ -60,6 +61,8 @@ class kosmosMotor(Thread):
 
     def send_data(self):
         i2c_Data = [self._state + 1, self.motor_revolutions, self.motor_vitesse, self.motor_accel, self.pause_time, self.step_mode]
+        # self.pause_time paramètre à enlever de la transmission, self.step_mode aussi à l'avenir
+        
         try:
                 self._bus.write_i2c_block_data(self._address, 0x00, i2c_Data)
         except:
