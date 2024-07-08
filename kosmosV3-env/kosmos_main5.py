@@ -20,7 +20,6 @@ from kosmos_config import *
 import kosmos_config as KConf
 import kosmos_csv as KCsv
 import kosmos_cam5 as KCam
-#import kosmos_esc_motor5 as KMotor
 import kosmos_motor as KMotor
 import sys
 
@@ -74,7 +73,6 @@ class kosmos_main():
         #Definition Thread Moteur
         self.PRESENCE_MOTEUR = self._conf.get_val_int("06_SYSTEM_moteur") # Fonctionnement moteur si 1
         if self.PRESENCE_MOTEUR==1:
-            #self.motorThread = KMotor.kosmosEscMotor(self._conf)
             self.motorThread = KMotor.kosmosMotor(self._conf)
           
     def clear_events(self):
