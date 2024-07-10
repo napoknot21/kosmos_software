@@ -204,10 +204,11 @@ class kosmos_main():
         
         #Arrêt du logging
         logging.shutdown()
-
+        
         # Commande de stop au choix arrêt du programme ou du PC
         if self._conf.get_val_int("05_SYSTEM_shutdown") != 0 :
             os.system("sudo shutdown -h now")
+            sys.exit(0)
         else :
             sys.exit(0)
 

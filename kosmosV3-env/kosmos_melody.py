@@ -9,7 +9,7 @@ class KMelody(list, Enum):
 	STANDBY_MELODY = [["E7", "E7", "E7", "D7", "E7", "G7"],[8, 8, 16, 8, 8, 8], 0.015, 0.7]
 	WORKING_MELODY = [["E7", "G7", "A7", "A7", "A7", "B7", "C8", "C8", "C8", "D8", "B7", "B7", "A7", "G7", "G7", "A7"], [8, 8, 16, 16, 8, 8, 16, 16, 8, 8, 16, 16, 8, 8, 8, 16], 0.018, 0.7]
 	STOPPING_MELODY = [["C8", "G7", "E7", "C7"], [4, 4, 4, 8], 0.02, 0.5]
-	SHUTDOWN_MELODY = [["C8", "B7", "A#7", "A7", "A#7", "A7", "A#7", "A7", "A#7", "A7", "A#7", "A7"], [32, 32, 32, 4, 4, 4, 4, 4, 4, 4, 4, 16], 0.02, 1]
+	SHUTDOWN_MELODY = [["C8", "B7", "A7", "G7", "F7", "E7", "D7", "C7"], [4, 4, 4, 4, 4, 4, 4, 16], 0.02, 1]
 	
 	def playMelody(buzzer, MELODY):
 		for i in range(0, len(MELODY[0])):
