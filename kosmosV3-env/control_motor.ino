@@ -8,6 +8,7 @@
 #define stepPin 5
 #define SleepModePin 6
 #define wakeUpPin 3
+#define LedPin A0
 
 // paramètres d'interruption ils
 #define interrupt_pin 2
@@ -45,6 +46,7 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 void setup() {
   pinMode(wakeUpPin, INPUT);
   pinMode(SleepModePin, OUTPUT);
+  pinMode(LedPin, OUTPUT);
   digitalWrite(SleepModePin, LOW);  //au démarrage, on met le contrôleur moteur en mode sleep
 
   // Set the maximum speed and acceleration:
@@ -131,7 +133,12 @@ void receiveData(int byteCount) {
 }
 
 void motorRotate() {
-  //désactivation du mode sleep
+  //clignotement de la led
+  digitalWrite(LedPin, HIGH);
+  delay(200);
+  digitalWrite(LedPin, LOW);
+  
+  //désactivation du mode sleep du driver moteur
   digitalWrite(SleepModePin, HIGH);
   //définition de la prochaine position
   stepper.move(400 * number_of_revolutions * step_mode);
