@@ -8,7 +8,7 @@
 #define stepPin 5
 #define SleepModePin 6
 #define wakeUpPin 3
-#define LedPin A0
+#define LedPin A3
 
 // paramètres d'interruption ils
 #define interrupt_pin 2
