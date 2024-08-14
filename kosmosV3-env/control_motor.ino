@@ -127,7 +127,7 @@ void receiveData(int byteCount) {
       stepper.setMaxSpeed(i2cData[2] * step_mode * 10);
       stepper.setAcceleration(i2cData[3] * step_mode * 10);
       goToSleep = bool(i2cData[4] - 1);
-      rotation_done = false;
+      rotation_done = !state_i2c;
     }
   }
 }
