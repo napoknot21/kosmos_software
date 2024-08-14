@@ -59,7 +59,9 @@ class kosmos_main():
         self.Button_Record = Button(self._conf.get_val_int("01_SYSTEM_record_button_gpio"))
         
         # Buzzer
-        self._buzzer = TonalBuzzer(self._conf.get_val_int("08_SYSTEM_buzzer"), octaves = 4)
+        self.BUZZER_ENABLED = self._conf.get_val_int("16_SYSTEM_buzzer_mode")
+        if self.BUZZER_ENABLED == 1:
+                self._buzzer = TonalBuzzer(self._conf.get_val_int("08_SYSTEM_buzzer"), octaves = 4)
         
         # Mode du système
         self.MODE=self._conf.get_val_int("00_SYSTEM_mode") 
@@ -90,7 +92,8 @@ class kosmos_main():
         
         self._ledB.blink()
         # mélodie jouée à l'allumage
-        KMelody.playMelody(self._buzzer, KMelody.STARTING_MELODY)
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STARTING_MELODY)
         time.sleep(0.5)
         
         self.thread_camera.initialisation_awb()
@@ -106,7 +109,8 @@ class kosmos_main():
         self._ledR.off()
         self._ledB.on()
         # mélodie jouée à la mise en mode standby
-        KMelody.playMelody(self._buzzer, KMelody.STANDBY_MELODY)
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STANDBY_MELODY)
         
         self.button_event.wait()
         if myMain.stop_event.is_set():
@@ -121,7 +125,8 @@ class kosmos_main():
         
         self._ledB.off()
         # mélodie jouée une fois au début de l'enregistrement vidéo
-        KMelody.playMelody(self._buzzer, KMelody.WORKING_MELODY)
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.WORKING_MELODY)
                 
         if self.PRESENCE_MOTEUR == 1:
             # Run thread moteur
@@ -153,7 +158,8 @@ class kosmos_main():
         self._ledB.off()
         self._ledR.blink()
         # mélodie jouée à la fin de l'enregistrement
-        KMelody.playMelody(self._buzzer, KMelody.STOPPING_MELODY)
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STOPPING_MELODY)
         
         # Demander la fin de l'enregistrement
         self.thread_camera.stopCam()
@@ -200,7 +206,8 @@ class kosmos_main():
         self._ledB.off()
         
         # mélodie jouée au shutdown
-        KMelody.playMelody(self._buzzer, KMelody.SHUTDOWN_MELODY)
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.SHUTDOWN_MELODY)
         
         #Arrêt du logging
         logging.shutdown()

@@ -89,10 +89,12 @@ class Server:
             self.myMain._ledB.close()
             self.myMain.Button_Stop.close() 
             self.myMain.Button_Record.close()
-            if self.myMain.PRESENCE_MOTEUR==1:
-                self.myMain.motorThread.Relai_GPIO.close()
-                self.myMain.motorThread.PWM_GPIO.close()
-                self.myMain.motorThread.Button_motor.close()
+            
+            """ Section suivante désactivée car plus utile dans la verion 4.0 """
+            #if self.myMain.PRESENCE_MOTEUR==1:
+                #self.myMain.motorThread.Relai_GPIO.close()
+                #self.myMain.motorThread.PWM_GPIO.close()
+                #self.myMain.motorThread.Button_motor.close()
             
             # Arrêt des Thread en cours
             if self.myMain.PRESENCE_MOTEUR==1:
