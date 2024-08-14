@@ -133,10 +133,8 @@ void receiveData(int byteCount) {
 }
 
 void motorRotate() {
-  //clignotement de la led
+  // led allumée
   digitalWrite(LedPin, HIGH);
-  delay(200);
-  digitalWrite(LedPin, LOW);
   
   //désactivation du mode sleep du driver moteur
   digitalWrite(SleepModePin, HIGH);
@@ -146,6 +144,9 @@ void motorRotate() {
   stepper.runToPosition();
   //réactivation du mode sleep
   digitalWrite(SleepModePin, LOW);
+
+  //led éteinte
+  digitalWrite(LedPin, LOW);
 }
 
 // fonction appelée par requête de la Raspberry
