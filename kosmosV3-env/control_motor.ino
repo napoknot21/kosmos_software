@@ -139,7 +139,7 @@ void motorRotate() {
   //désactivation du mode sleep du driver moteur
   digitalWrite(SleepModePin, HIGH);
   //définition de la prochaine position
-  stepper.move(400 * number_of_revolutions * step_mode);
+  stepper.move(-400 * number_of_revolutions * step_mode);
   //déplacement jusqu'à la position précédemment définie, à la vitesse et accélération définie
   stepper.runToPosition();
   //réactivation du mode sleep
