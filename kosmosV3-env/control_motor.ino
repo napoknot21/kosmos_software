@@ -139,7 +139,8 @@ void motorRotate() {
   //désactivation du mode sleep du driver moteur
   digitalWrite(SleepModePin, HIGH);
   //définition de la prochaine position
-  stepper.move(-400 * number_of_revolutions * step_mode);
+  stepper.move(-400 * number_of_revolutions * step_mode); //le "-" qui définit le sens de rotation anti-horaire est important pour que les efforts axiaux sur la vis sans fin soient dirigés vers le moteur,
+                                                          //ainsi la vis est contrainte contre le pignon moteur et ne se désengage pas.
   //déplacement jusqu'à la position précédemment définie, à la vitesse et accélération définie
   stepper.runToPosition();
   //réactivation du mode sleep
