@@ -92,13 +92,15 @@ class Server:
             # Désallocation des GPIOs avant reboot
             self.myMain._ledR.close()
             self.myMain._ledB.close()
+            self.myMain._buzzer.close()
             self.myMain.Button_Stop.close() 
             self.myMain.Button_Record.close()
+            '''
             if self.myMain.PRESENCE_MOTEUR==1:
                 self.myMain.motorThread.Relai_GPIO.close()
                 self.myMain.motorThread.PWM_GPIO.close()
                 self.myMain.motorThread.Button_motor.close()
-            
+            '''
             # Arrêt des Thread en cours
             if self.myMain.PRESENCE_MOTEUR==1:
                 del self.myMain.motorThread
@@ -133,12 +135,16 @@ class Server:
             # Désallocation des GPIOs avant reboot
             self.myMain._ledR.close()
             self.myMain._ledB.close()
+            self.myMain._buzzer.close()
             self.myMain.Button_Stop.close() 
             self.myMain.Button_Record.close()
+            
+            '''
             if self.myMain.PRESENCE_MOTEUR==1:
                 self.myMain.motorThread.Relai_GPIO.close()
                 self.myMain.motorThread.PWM_GPIO.close()
                 self.myMain.motorThread.Button_motor.close()
+            '''
             
             # Arrêt des Thread en cours
             if self.myMain.PRESENCE_MOTEUR==1:
