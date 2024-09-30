@@ -22,7 +22,8 @@ GIT_PATH = ROOT_PATH+"kosmos_software/"
 WORK_PATH = GIT_PATH+"kosmosV3-env/"
 
 #  Sections config, campagne, et debug 
-CONF_FILE_TEMPLATE = "kosmos_config_template.ini"
+#CONF_FILE_TEMPLATE = "kosmos_config_template.ini"
+CONF_FILE_TEMPLATE = "kosmos_config_template_2.ini"
 CONF_FILE = "kosmos_config.ini"
 CONFIG_SECTION = "KOSMOS-config"
 CAMPAGNE_SECTION = "KOSMOS-campagne"
