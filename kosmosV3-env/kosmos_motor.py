@@ -36,7 +36,7 @@ class kosmosMotor(Thread):
         self._continue_event = Event()
         self._t_stop = False 
 
-        self.wakeUp_GPIO = DigitalOutputDevice(aConf.get_val_int("09_SYSTEM_wake_up_motor"))
+        self.wakeUp_GPIO = DigitalOutputDevice(aConf.config.getint(CONFIG_SECTION, "09_SYSTEM_wake_up_motor"))
         self.wakeUp_GPIO.off()
       
         self._address = 0x04
@@ -44,17 +44,17 @@ class kosmosMotor(Thread):
         self._sleep_mode = 0
         
         # Paramètres Moteur
-        self.motor_revolutions = aConf.get_val_int("10_MOTOR_revolutions")
+        self.motor_revolutions = aConf.config.getint(CONFIG_SECTION, "10_MOTOR_revolutions")
         # 10 revolutions : 60°
-        self.motor_vitesse = aConf.get_val_int("11_MOTOR_vitesse")
+        self.motor_vitesse = aConf.config.getint(CONFIG_SECTION, "11_MOTOR_vitesse")
         # minimum : 1 ; maximum : 250
-        self.motor_accel = aConf.get_val_int("12_MOTOR_acceleration")
+        self.motor_accel = aConf.config.getint(CONFIG_SECTION, "12_MOTOR_acceleration")
         # minimum : 1 ; maximum : 250
-        self.pause_time = aConf.get_val_int("13_MOTOR_pause_time")
+        self.pause_time = aConf.config.getint(CONFIG_SECTION, "13_MOTOR_pause_time")
         # en s
-        self.step_mode = aConf.get_val_int("14_MOTOR_step_mode")
+        self.step_mode = aConf.config.getint(CONFIG_SECTION, "14_MOTOR_step_mode")
         # 1 pour full_step, 2 pour 1/2 microstep, 4 pour 1/4 microstep, 16 pour 1/16 microstep etc
-        self.i2c_period = aConf.get_val_int("15_MOTOR_i2c_communication_period")
+        self.i2c_period = aConf.config.getint(CONFIG_SECTION, "15_MOTOR_i2c_communication_period")
         # en s
 
     def power_on(self):
