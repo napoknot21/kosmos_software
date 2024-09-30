@@ -4,7 +4,7 @@ import logging
 import time
 from threading import Event
 import threading
-from gpiozero import LED, Button
+from gpiozero import LED, Button, TonalBuzzer
 import os
 import json
 
@@ -13,6 +13,7 @@ from threading import Thread
 
 #Tous les methodes de l'API sont dans le fichier kosmos_backend.py
 import kosmos_backend5 as KBackend
+from kosmos_melody import KMelody
 
 #Isolation du class KState dans le fichier kosmos_state.py
 from kosmos_state import KState
@@ -20,7 +21,8 @@ from kosmos_state import KState
 from kosmos_config import *
 import kosmos_config as KConf
 import kosmos_cam5 as KCam
-import kosmos_esc_motor5 as KMotor
+#import kosmos_esc_motor5 as KMotor
+import kosmos_motor as KMotor
 import sys
 
 logging.basicConfig(level=logging.INFO,
@@ -56,6 +58,11 @@ class kosmos_main():
         # Boutons
         self.Button_Stop = Button(self._conf.config.getint(DEBUG_SECTION,"02_SYSTEM_stop_button_gpio"))
         self.Button_Record = Button(self._conf.config.getint(DEBUG_SECTION,"01_SYSTEM_record_button_gpio"))
+
+        # Buzzer
+        self.BUZZER_ENABLED = self._conf.config.getint(CONFIG_SECTION, "16_SYSTEM_buzzer_mode")
+        if self.BUZZER_ENABLED == 1:
+                self._buzzer = TonalBuzzer(self._conf.config.getint(CONFIG_SECTION, "08_SYSTEM_buzzer"), octaves = 4)
         
         # Mode du système
         self.MODE=self._conf.config.getint(CONFIG_SECTION,"00_SYSTEM_mode") 
@@ -69,7 +76,8 @@ class kosmos_main():
         # Definition Thread Moteur
         self.PRESENCE_MOTEUR = self._conf.config.getint(CONFIG_SECTION,"06_SYSTEM_moteur") # Fonctionnement moteur si 1
         if self.PRESENCE_MOTEUR==1:
-            self.motorThread = KMotor.kosmosEscMotor(self._conf)
+            #self.motorThread = KMotor.kosmosEscMotor(self._conf)
+            self.motorThread = KMotor.kosmosMotor(self._conf)
  
     def clear_events(self):
         """Mise à 0 des evenements attachés aux boutons"""
@@ -81,6 +89,11 @@ class kosmos_main():
         logging.info("STARTING : Kosmos en train de démarrer")
         
         self._ledB.blink()
+      
+        # mélodie jouée à l'allumage
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STARTING_MELODY)
+        time.sleep(0.5)
         
         self.thread_camera.initialisation_awb()
         
@@ -94,6 +107,10 @@ class kosmos_main():
         self._extinction = False 
         self._ledR.off()
         self._ledB.on()
+
+        # mélodie jouée à la mise en mode standby
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STANDBY_MELODY)
         
         self.button_event.wait()
         if myMain.stop_event.is_set():
@@ -117,6 +134,10 @@ class kosmos_main():
         self._conf.add_line(EVENT_FILE,event_line)
       
         self._ledB.off()
+
+        # mélodie jouée une fois au début de l'enregistrement vidéo
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.WORKING_MELODY)
         
         if self.PRESENCE_MOTEUR == 1:
             # Run thread moteur
@@ -148,6 +169,10 @@ class kosmos_main():
         
         self._ledB.off()
         self._ledR.blink()
+
+        # mélodie jouée à la fin de l'enregistrement
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.STOPPING_MELODY)
         
         # Demander la fin de l'enregistrement
         self.thread_camera.stopCam()
@@ -189,7 +214,10 @@ class kosmos_main():
         # Extinction des LEDs
         self._ledR.off()
         self._ledB.off()
-        
+
+        # mélodie jouée au shutdown
+        if self.BUZZER_ENABLED == 1:
+                KMelody.playMelody(self._buzzer, KMelody.SHUTDOWN_MELODY)
         
         logging.info("EXTINCTION")
         #Arrêt du logging
