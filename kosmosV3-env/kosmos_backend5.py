@@ -4,6 +4,7 @@ from flask import Flask,request,make_response
 from PIL import Image
 import io
 import os
+import csv
 
 
 import logging
@@ -32,6 +33,7 @@ class Server:
         self.app.add_url_rule("/changeCampagne", view_func=self.changeCampagne,methods=['POST'])
         self.app.add_url_rule("/getCampagne", view_func=self.getCampagne)
         self.app.add_url_rule("/frame", view_func=self.image)
+        self.app.add_url_rule("/update-metadata", view_func=self.updateMetadata)
 
     def run(self) :
         logging.info("Server is running !")
@@ -47,8 +49,13 @@ class Server:
         if(self.myMain.state==KState.STANDBY):   
             self.myMain.record_event.set() 
             self.myMain.button_event.set()
+
+            # get the video_path
+            video_path = self.myMain.video_path
+
             return {
-                "status" : "ok"
+                "status" : "ok",
+                "video_path": video_path
             }
         else :
             return {
@@ -59,6 +66,8 @@ class Server:
         if(self.myMain.state==KState.WORKING):
             self.myMain.record_event.set()
             self.myMain.button_event.set()
+
+            self.myMain.video_path = None
             return {
                 "status" : "ok"
             }
@@ -201,3 +210,77 @@ class Server:
         return response    
 
         
+    def updateMetadata(self):
+        if (self.myMain.state == KState.STOPPING or self.myMain.state == KState.STANDBY):
+            data = request.json
+        
+            try:
+                # Changer de répertoire pour le chemin vidéo spécifié
+                os.chdir(data['video_path'])
+
+                # Créer le fichier metadata.csv et y écrire les en-têtes et les données
+                with open('metadata.csv', mode='w', newline='', encoding='utf-8') as file:
+                    writer = csv.writer(file, delimiter=';')
+
+                    # En-têtes du fichier CSV
+                    writer.writerow([
+                        "Code Station", "Heure", "Minute", "Seconde",
+                        "Site", "Latitude", "Longitude",
+                        "Profondeur", "Température", "Salinité",
+                        "Lune", "Marée", "Coefficient",
+                        "Ciel", "Vent", "Direction", "Pression Atm", "Temp. Air",
+                        "État de la Mer", "Houle",
+                        "Exploitabilité", "Habitat", "Faune", "Visibilité"
+                    ])
+
+                    # Récupération des données pour chaque section
+                    codeStation = data.get('codeStation', '')
+                    heure = data['heureDict'].get('heure', '')
+                    minute = data['heureDict'].get('minute', '')
+                    seconde = data['heureDict'].get('seconde', '')
+                    site = data['gpsDict'].get('site', '')
+                    latitude = data['gpsDict'].get('latitude', '')
+                    longitude = data['gpsDict'].get('longitude', '')
+                    profondeur = data['ctdDict'].get('profondeur', '')
+                    temperature = data['ctdDict'].get('temperature', '')
+                    salinite = data['ctdDict'].get('salinite', '')
+                    lune = data['astroDict'].get('lune', '')
+                    maree = data['astroDict'].get('maree', '')
+                    coefficient = data['astroDict'].get('coefficient', '')
+                    ciel = data['meteoAirDict'].get('ciel', '')
+                    vent = data['meteoAirDict'].get('vent', '')
+                    direction = data['meteoAirDict'].get('direction', '')
+                    atmPress = data['meteoAirDict'].get('atmPress', '')
+                    tempAir = data['meteoAirDict'].get('tempAir', '')
+                    etatMer = data['meteoMerDict'].get('etatMer', '')
+                    houle = data['meteoMerDict'].get('houle', '')
+                    exploitabilite = data['analyseDict'].get('exploitabilite', '')
+                    habitat = data['analyseDict'].get('habitat', '')
+                    faune = data['analyseDict'].get('faune', '')
+                    visibilite = data['analyseDict'].get('visibilite', '')
+
+                    # Écrire les données dans le fichier CSV
+                    writer.writerow([
+                        codeStation, heure, minute, seconde,
+                        site, latitude, longitude,
+                        profondeur, temperature, salinite,
+                        lune, maree, coefficient,
+                        ciel, vent, direction, atmPress, tempAir,
+                        etatMer, houle,
+                        exploitabilite, habitat, faune, visibilite
+                    ])
+
+                return {
+                    "status": "ok"
+                }
+
+            except Exception as e:
+                logging.error(f"Erreur lors de la création du fichier metadata.csv : {e}")
+                return {
+                    "status": "error"
+                }
+
+        else:
+            return {
+                "status": "error"
+            }

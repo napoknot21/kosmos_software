@@ -8,19 +8,50 @@ let live = false;
 
 // Function to send a start request to the server
 async function start() {
-  const response = await fetch(serverUrl + "/start");
-  const body = await response.json();
-  console.log(body);
+  // update the campagne metadata on the server
+  try {
+    const postResponse = await fetch(serverUrl + "/changeCampagne", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: localStorage.getItem('metadata')
+    });
+
+    const campagneData = await postResponse.json();
+
+    // Assuming the response structure is { status: "ok" }
+    if (campagneData.status === "ok") {
+      console.log("Campagne metadata updated on the server");
+    } else {
+      throw new Error(`Failed to update campagne metadata on the server : ${campagneData.status}`);
+    }
+    const response = await fetch(serverUrl + "/start");
+    if (!response.ok) {
+      throw new Error(`Erreur du serveur : ${response.status}`);
+    }
+
+    const body = await response.json();  
+    if (body.video_path) {
+      // stocking the video path in the local storage
+      localStorage.setItem('video_path', body.video_path);
+    } else {
+      console.error("Chemin de la vidéo non trouvé dans la réponse.");
+    }
+  } catch (error) {
+    console.error("Error starting the video : ",error)
+  }
 }
 
 // Function to send a stop request to the server
 async function stop() {
-  // Redirect to the Metadata page after the stop request is successful
-  window.location.href = "./metadata.html";
   const response = await fetch(serverUrl + "/stop");
   const body = await response.json();
+  // Redirect to the Metadata page after the stop request is successful
+  if(body.status == "ok")
+    window.location.href = "./metadata.html";
+
   console.log(body);
-  
 }
 
 // Function to send a shutdown request to the server

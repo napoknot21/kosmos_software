@@ -70,6 +70,9 @@ class kosmos_main():
         self.PRESENCE_MOTEUR = self._conf.config.getint(CONFIG_SECTION,"06_SYSTEM_moteur") # Fonctionnement moteur si 1
         if self.PRESENCE_MOTEUR==1:
             self.motorThread = KMotor.kosmosEscMotor(self._conf)
+        
+        # Définition du path de la video en cours d'enregistrement
+        self.video_path = None 
  
     def clear_events(self):
         """Mise à 0 des evenements attachés aux boutons"""
@@ -141,7 +144,10 @@ class kosmos_main():
         self._conf.system.set(INCREMENT_SECTION,"increment",str(increment+1))       
         self._conf.update_system()
         
-        self.state = KState.STOPPING       
+        self.state = KState.STOPPING    
+
+        # stocker le chemin du fichier vidéo pour l'accéder depuis la methode de lancement de la video
+        self.video_path = VID_PATH   
     
     def stopping(self):
         logging.info("STOPPING : Kosmos termine son enregistrement")
