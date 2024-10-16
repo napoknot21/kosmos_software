@@ -212,6 +212,11 @@ function confirmChanges() {
     },
   };
 
+  const videoPath = localStorage.getItem('video_path');
+  if (videoPath) {
+    updatedData.video_path = videoPath;
+    localStorage.removeItem('video_path');
+  }
   // Send updated data to server
   fetch('/update-metadata', {
     method: 'POST',
