@@ -51,7 +51,8 @@ class Server:
             self.myMain.button_event.set()
 
             # get the video_path
-            video_path = self.myMain.video_path
+            while(video_path):
+                video_path = self.myMain.video_path
 
             return {
                 "status" : "ok",
@@ -59,7 +60,7 @@ class Server:
             }
         else :
             return {
-                "status" : "error"
+                "status" : "error starting the video"
             }
 
     def stop(self):
@@ -73,7 +74,7 @@ class Server:
             }
         else :
             return {
-                "status" : "error"
+                "status" : "error stoping the video"
             }
     
     def shutdown(self):
@@ -162,7 +163,7 @@ class Server:
             }
         else:
             return {
-                "status" : "error"
+                "status" : "error lors du changement des donnees de campagne"
             }
         
     def getConfig(self):

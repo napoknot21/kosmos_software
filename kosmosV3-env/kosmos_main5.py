@@ -113,6 +113,10 @@ class kosmos_main():
         video_file = self._conf.config.get(CAMPAGNE_SECTION,"zone") + f'{self._conf.get_date_Y()}' + f'{increment:04}'     
         os.mkdir(video_file)
         VID_PATH = self._conf.CAMPAGNE_PATH+video_file
+
+        # stocker le chemin du fichier vidéo pour l'accéder depuis la methode de lancement de la video
+        self.video_path = VID_PATH   
+        
         os.chdir(VID_PATH) # Ligne très importante pour bonne destination des fichiers !!!
 
         # Initialisation de fichier Event
@@ -145,9 +149,6 @@ class kosmos_main():
         self._conf.update_system()
         
         self.state = KState.STOPPING    
-
-        # stocker le chemin du fichier vidéo pour l'accéder depuis la methode de lancement de la video
-        self.video_path = VID_PATH   
     
     def stopping(self):
         logging.info("STOPPING : Kosmos termine son enregistrement")

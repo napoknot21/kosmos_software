@@ -24,10 +24,12 @@ async function start() {
     if (campagneData.status === "ok") {
       console.log("Campagne metadata updated on the server");
     } else {
+      console.error(`Failed to update campagne metadata on the server : ${campagneData.status}`);
       throw new Error(`Failed to update campagne metadata on the server : ${campagneData.status}`);
     }
     const response = await fetch(serverUrl + "/start");
     if (!response.ok) {
+      console.error(`Erreur du serveur : ${response.status}`);
       throw new Error(`Erreur du serveur : ${response.status}`);
     }
 
